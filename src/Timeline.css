@@ -1,0 +1,46 @@
+.chart {
+  shape-rendering: crispEdges;
+}
+
+.timelineDiv {
+  width: 100%;
+  margin: 0;
+  position: relative;
+  display: inline-block;
+  background-color: #26262626;
+}
+
+.mini text {
+  font: 9px sans-serif;
+}
+
+.main text {
+  font: 12px sans-serif;
+}
+
+.miniItem0 {
+  fill: #31e89f;
+  fill-opacity: 0.5;
+  stroke-width: 6;
+  border-radius: 1px;
+}
+
+.miniItem1 {
+  fill: #31c6e8;
+  fill-opacity: 0.5;
+  stroke-width: 6;
+  border-radius: 1px;
+}
+
+.miniItem2 {
+  fill: #31e8e8;
+  fill-opacity: 0.5;
+  stroke-width: 6;
+  border-radius: 1px;
+}
+
+.brush .extent {
+  stroke: gray;
+  fill: dodgerblue;
+  fill-opacity: 0.365;
+}
