@@ -1,5 +1,6 @@
 .chart {
   shape-rendering: crispEdges;
+  background-color: #262626;
 }
 
 .timelineDiv {
@@ -7,34 +8,34 @@
   margin: 0;
   position: relative;
   display: inline-block;
-  background-color: #26262626;
+  background-color: #121212;
 }
 
 .mini text {
-  font: 9px sans-serif;
+  font: 12px "Source Sans Pro";
 }
 
 .main text {
-  font: 12px sans-serif;
+  font: 16px "Source Sans Pro";
+}
+
+text {
+  fill: #ffffffde;
 }
 
 .miniItem0 {
   fill: #31e89f;
-  fill-opacity: 0.5;
   stroke-width: 6;
-  border-radius: 1px;
 }
 
 .miniItem1 {
   fill: #31c6e8;
-  fill-opacity: 0.5;
   stroke-width: 6;
   border-radius: 1px;
 }
 
 .miniItem2 {
   fill: #31e8e8;
-  fill-opacity: 0.5;
   stroke-width: 6;
   border-radius: 1px;
 }

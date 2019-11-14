@@ -193,12 +193,13 @@ function buildTimeline() {
       return x(d.start);
     })
     .attr("y", function(d) {
-      return y2(d.lane + 0.5) - 5;
+      return y2(d.lane + 0.5) - 10;
     })
     .attr("width", function(d) {
       return x(d.end - d.start);
     })
-    .attr("height", 10);
+    .attr("height", 20)
+    .attr("rx", 3);
 
   //mini labels
   mini
@@ -282,7 +283,8 @@ function buildTimeline() {
       })
       .attr("height", function(d) {
         return 0.8 * y1(1);
-      });
+      })
+      .attr("rx", "9");
     rects.exit().remove();
     //update the item labels
     labels = itemRects
