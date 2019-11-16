@@ -11,6 +11,10 @@
   background-color: #121212;
 }
 
+.textBox {
+  margin-top: 10px;
+}
+
 .mini text {
   font: 12px "Source Sans Pro";
 }

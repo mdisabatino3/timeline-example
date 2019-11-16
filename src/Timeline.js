@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import * as d3 from "d3";
 import "./Timeline.css";
+import { node } from "prop-types";
 
 function Timeline() {
   useEffect(() => {
@@ -9,6 +10,7 @@ function Timeline() {
   return (
     <>
       <div className="timelineDiv" />
+      <svg className="textBox" />
     </>
   );
 }
@@ -16,8 +18,6 @@ function Timeline() {
 function buildTimeline() {
   var parseTime = d3.timeParse("%b %Y");
   d3.csv("experience.csv").then(function(data) {
-    console.log(data);
-    console.log("printing data");
     data.forEach(function(d) {
       d.lane = +d.lane;
       d.id = +d.id;
@@ -26,19 +26,22 @@ function buildTimeline() {
     });
 
     var lanes = ["Work", "Education", "Experience"];
+    var laneLogos = ["work.png", "education.jpg", "experience.png"];
     var laneLength = lanes.length;
     var timeBegin = d3.min(
       data.map(d => {
         return d.start;
       })
     );
+    var copyTimeBegin = new Date(timeBegin.getTime());
+    copyTimeBegin.setDate(copyTimeBegin.getDate() - 60);
     console.log(timeBegin);
+    console.log(copyTimeBegin);
     var timeEnd = d3.max(
       data.map(d => {
         return d.end;
       })
     );
-    console.log(timeEnd);
     var margin = {
         top: 20,
         right: 15,
@@ -51,9 +54,9 @@ function buildTimeline() {
       mainHeight = h - miniHeight - 50;
     var x = d3
       .scaleTime()
-      .domain([timeBegin, timeEnd])
+      .domain([copyTimeBegin, timeEnd])
       .range([0, w]);
-    console.log("checking xscale on ", data[10], x(data[10].start));
+    console.log(x(timeBegin));
     var x1 = d3.scaleTime().range([0, w]);
     var y1 = d3
       .scaleLinear()
@@ -93,19 +96,20 @@ function buildTimeline() {
       .attr("height", miniHeight)
       .attr("class", "mini");
     //main lanes and texts
+    var uniqueLanes = [...new Set(data.map(d => d.lane))];
     main
       .append("g")
       .selectAll(".laneLines")
-      .data(data)
+      .data(uniqueLanes)
       .enter()
       .append("line")
       .attr("x1", margin.right)
-      .attr("y1", function(d) {
-        return y1(d.lane);
+      .attr("y1", function(lane) {
+        return y1(lane);
       })
       .attr("x2", w)
-      .attr("y2", function(d) {
-        return y1(d.lane);
+      .attr("y2", function(lane) {
+        return y1(lane);
       })
       .attr("stroke", "lightgray");
     main
@@ -128,16 +132,16 @@ function buildTimeline() {
     mini
       .append("g")
       .selectAll(".laneLines")
-      .data(data)
+      .data(uniqueLanes)
       .enter()
       .append("line")
       .attr("x1", margin.right)
-      .attr("y1", function(d) {
-        return y2(d.lane);
+      .attr("y1", function(lane) {
+        return y2(lane);
       })
       .attr("x2", w)
-      .attr("y2", function(d) {
-        return y2(d.lane);
+      .attr("y2", function(lane) {
+        return y2(lane);
       })
       .attr("stroke", "lightgray");
 
@@ -177,28 +181,27 @@ function buildTimeline() {
         return y2(d.lane + 0.5) - 10;
       })
       .attr("width", function(d) {
-        console.log(x(d.end) - x(d.start));
         return x(d.end) - x(d.start);
       })
       .attr("height", 20)
       .attr("rx", 3);
     //mini labels
-    mini
-      .append("g")
-      .selectAll(".miniLabels")
-      .data(data)
-      .enter()
-      .append("text")
-      .text(function(d) {
-        return d.id;
-      })
-      .attr("x", function(d) {
-        return x(d.start);
-      })
-      .attr("y", function(d) {
-        return y2(d.lane + 0.5);
-      })
-      .attr("dy", ".5ex");
+    // mini
+    //   .append("g")
+    //   .selectAll(".miniLabels")
+    //   .data(data)
+    //   .enter()
+    //   .append("text")
+    //   .text(function(d) {
+    //     return d.id;
+    //   })
+    //   .attr("x", function(d) {
+    //     return x(d.start);
+    //   })
+    //   .attr("y", function(d) {
+    //     return y2(d.lane + 0.5);
+    //   })
+    //   .attr("dy", ".5ex");
 
     //brush
     var brush = d3
@@ -212,16 +215,16 @@ function buildTimeline() {
       .call(brush)
       .selectAll("rect")
       .attr("y", 1)
-      .attr("height", miniHeight - 1);
+      .attr("height", miniHeight - 1)
+      .attr("width", 200);
 
     function display() {
-      console.log("display called");
       if (!d3.event) return;
       if (!d3.event.sourceEvent) return; // Only transition after input.
       if (!d3.event.selection) return;
-      console.log("hit after error checks");
       var rects,
-        labels,
+        logos,
+        logoBacks,
         minExtent = d3.event.selection.map(x.invert)[0]
           ? d3.event.selection.map(x.invert)[0]
           : 0,
@@ -231,7 +234,6 @@ function buildTimeline() {
         visItems = data.filter(function(d) {
           return d.start < maxExtent && d.end > minExtent;
         });
-      console.log("rects", rects);
       x1.domain([minExtent, maxExtent]);
       //update main item rects
       rects = itemRects
@@ -251,6 +253,7 @@ function buildTimeline() {
         .attr("class", function(d) {
           return "miniItem" + d.lane;
         })
+        .attr("id", d => "r" + d.id)
         .attr("x", function(d) {
           return x1(d.start);
         })
@@ -263,31 +266,77 @@ function buildTimeline() {
         .attr("height", function(d) {
           return 0.8 * y1(1);
         })
-        .attr("rx", "9");
+        .attr("stroke", "#FFFFFFDE")
+        .attr("stroke-width", "1")
+        .attr("rx", "9")
+        .on("mouseover", function(data) {
+          console.log(this);
+          console.log(data.lane);
+          d3.select(".textBox")
+            .append("text")
+            .text("new text")
+            .attr("fill", "white")
+            .attr("y", "20px");
+          console.log(data);
+        });
       rects.exit().remove();
-      //update the item labels
-      labels = itemRects
-        .selectAll("text")
+
+      // // if (d3.select(".minItem1"))
+      // var aRect = d3.select("#r6");
+      // var aRectSizeOnScreen =
+      //   parseFloat(aRect.attr("width")) + parseFloat(aRect.attr("x"));
+
+      logoBacks = itemRects
+        .selectAll("circle")
+        .data(visItems, function(d) {
+          return d.id;
+        })
+        .attr("cx", function(d) {
+          return x1(d.start);
+        });
+
+      logoBacks
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+          return x1(d.start);
+        })
+        .attr("cy", function(d) {
+          return y1(d.lane + 0.5);
+        })
+        .attr("r", 30)
+        .attr("fill", "white");
+      logoBacks.exit().remove();
+
+      // update the item labels
+      logos = itemRects
+        .selectAll("image")
         .data(visItems, function(d) {
           return d.id;
         })
         .attr("x", function(d) {
-          return x1(Math.max(d.start, minExtent) + 2);
+          return x1(d.start);
         });
-      labels
+
+      logos
         .enter()
-        .append("text")
-        .text(function(d) {
-          return d.title;
-        })
+        .append("image")
+        .attr("xlink:href", d => `${laneLogos[d.lane]}`)
         .attr("x", function(d) {
-          return x1(Math.max(d.start, minExtent));
+          return x1(d.start);
         })
+        .style("transform", "translate(-2.2%,-4%)")
         .attr("y", function(d) {
           return y1(d.lane + 0.5);
         })
-        .attr("text-anchor", "start");
-      labels.exit().remove();
+        .attr("height", 40)
+        .attr("text-anchor", "start")
+        .attr("class", d => "imageLane" + d.id)
+        .attr("id", d => "i" + d.id);
+
+      logos.exit().remove();
+
+      // console.log("labels ", d3.selectAll("#i6").text().length * 7);
     }
     display();
   });
