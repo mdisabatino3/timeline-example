@@ -34,8 +34,6 @@ function buildTimeline() {
     );
     var copyTimeBegin = new Date(timeBegin.getTime());
     copyTimeBegin.setDate(copyTimeBegin.getDate() - 60);
-    console.log(timeBegin);
-    console.log(copyTimeBegin);
     var timeEnd = d3.max(
       data.map(d => {
         return d.end;
@@ -55,7 +53,6 @@ function buildTimeline() {
       .scaleTime()
       .domain([copyTimeBegin, timeEnd])
       .range([0, w]);
-    console.log(x(timeBegin));
     var x1 = d3.scaleTime().range([0, w]);
     var y1 = d3
       .scaleLinear()
@@ -347,8 +344,6 @@ function buildTimeline() {
         .attr("r", 30)
         .attr("fill", "transparent")
         .on("mouseover", function(data) {
-          console.log(this);
-          console.log(data.lane);
           var newTitle = d3
             .select(".textBox")
             .append("text")
@@ -361,30 +356,16 @@ function buildTimeline() {
             .text(data.description)
             .attr("fill", "white")
             .attr("y", "40px");
-          var detailsArray = data.details.split(" ");
-          var newDetails = d3.select(".textBox").append("tspan");
-          var newDetArr = [];
-          for (
-            var i = 0;
-            i < detailsArray.length;
-            i + (detailsArray.length % 5)
-          ) {
-            console.log(i);
-          }
 
           // .text(data.details.length)
           // .attr("fill", "white")
           // .attr("y", "60px");
-          console.log(data);
           d3.select(this).on("mouseout", function() {
             newTitle.remove();
             newDescription.remove();
-            newDetails.remove();
           });
         });
       logoOverlay.exit().remove();
-
-      // console.log("labels ", d3.selectAll("#i6").text().length * 7);
     }
     display();
   });
