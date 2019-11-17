@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import * as d3 from "d3";
 import "./Timeline.css";
-import { node } from "prop-types";
 
 function Timeline() {
   useEffect(() => {
@@ -225,6 +224,7 @@ function buildTimeline() {
       var rects,
         logos,
         logoBacks,
+        logoOverlay,
         minExtent = d3.event.selection.map(x.invert)[0]
           ? d3.event.selection.map(x.invert)[0]
           : 0,
@@ -268,17 +268,7 @@ function buildTimeline() {
         })
         .attr("stroke", "#FFFFFFDE")
         .attr("stroke-width", "1")
-        .attr("rx", "9")
-        .on("mouseover", function(data) {
-          console.log(this);
-          console.log(data.lane);
-          d3.select(".textBox")
-            .append("text")
-            .text("new text")
-            .attr("fill", "white")
-            .attr("y", "20px");
-          console.log(data);
-        });
+        .attr("rx", "9");
       rects.exit().remove();
 
       // // if (d3.select(".minItem1"))
@@ -335,6 +325,64 @@ function buildTimeline() {
         .attr("id", d => "i" + d.id);
 
       logos.exit().remove();
+
+      logoOverlay = itemRects
+        .selectAll("overlaycircle")
+        .data(visItems, function(d) {
+          return d.id;
+        })
+        .attr("cx", function(d) {
+          return x1(d.start);
+        });
+
+      logoOverlay
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+          return x1(d.start);
+        })
+        .attr("cy", function(d) {
+          return y1(d.lane + 0.5);
+        })
+        .attr("r", 30)
+        .attr("fill", "transparent")
+        .on("mouseover", function(data) {
+          console.log(this);
+          console.log(data.lane);
+          var newTitle = d3
+            .select(".textBox")
+            .append("text")
+            .text(data.title)
+            .attr("fill", "white")
+            .attr("y", "20px");
+          var newDescription = d3
+            .select(".textBox")
+            .append("text")
+            .text(data.description)
+            .attr("fill", "white")
+            .attr("y", "40px");
+          var detailsArray = data.details.split(" ");
+          var newDetails = d3.select(".textBox").append("tspan");
+          var newDetArr = [];
+          for (
+            var i = 0;
+            i < detailsArray.length;
+            i + (detailsArray.length % 5)
+          ) {
+            console.log(i);
+          }
+
+          // .text(data.details.length)
+          // .attr("fill", "white")
+          // .attr("y", "60px");
+          console.log(data);
+          d3.select(this).on("mouseout", function() {
+            newTitle.remove();
+            newDescription.remove();
+            newDetails.remove();
+          });
+        });
+      logoOverlay.exit().remove();
 
       // console.log("labels ", d3.selectAll("#i6").text().length * 7);
     }
